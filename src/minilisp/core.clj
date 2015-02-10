@@ -7,12 +7,10 @@
 
 (defn self-evaluating? [exp]
   (or (number? exp)
-      (primative-procedure exp)
-      (nil? exp)))
+      (primative-procedure exp)))
 
 (defn variable? [exp]
-  (and (symbol? exp)
-       (not (primative-procedure exp))))
+  (symbol? exp))
 
 (defn def? [exp]
   (and (seq? exp)
