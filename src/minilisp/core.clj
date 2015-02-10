@@ -60,7 +60,7 @@
 
            (def? sexp)
            [nil (let [name (def-name sexp)
-                      value (def-value sexp)]
+                       value (def-value sexp)]
                   (assoc env name (value-of (eval-sexp value env))))]
 
            (fn? sexp)
@@ -95,15 +95,16 @@
   (apply (primative-procedure proc) args))
 
 (defn apply-proc [proc args]
-  (cond (primative-procedure proc)
-        (apply-primative-procedure proc args)
+  (cond
+   (primative-procedure proc)
+   (apply-primative-procedure proc args)
 
-        (compound-procedure? proc)
-        (value-of ( eval-sexp (:body proc)
-                              (merge
-                               (:env proc)
-                               (zipmap (:params proc)
-                                       args))))
+   (compound-procedure? proc)
+   (value-of (eval-sexp (:body proc)
+                        (merge
+                         (:env proc)
+                         (zipmap (:params proc)
+                                 args))))
 
         :else
         (error "apply-proc error")))
