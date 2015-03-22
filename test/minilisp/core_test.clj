@@ -1,36 +1,72 @@
 (ns minilisp.core-test
-  (:require [clojure.test :refer :all]
-            [minilisp.core :refer :all])
-  (:refer-clojure :exclude [eval apply fn?]))
+  (:require
+            [minilisp.core :refer :all]
+            [expectations :refer :all])
+  (:refer-clojure :exclude [eval fn? true?]))
 
-(deftest test-self-evaluating?
-  (testing "numbers"
-    (is (= 3 (value-of (eval-sexp '3 {}))))))
+(expect '3
+        (eval '3))
 
-(deftest test-variable?
-  (is (= 2 (value-of (eval-sexp 'a {'a 2})))))
+(expect 'true
+        (eval 'true))
 
-(deftest test-def?
-  (is (= (second (eval-sexp '(def a 3) {}))
-         {'a 3})))
+(expect 2
+        (eval 'a {'a 2}))
 
-(deftest test-apply-promative
-  (is (= 2 (value-of (eval-sexp '(+ 1 1)))))
-  (is (= 5 (value-of (eval-sexp '(+ (+ 1 2) 1 1))))))
+(expect 2
+        (eval '(+ 1 1)))
 
-(deftest test-eval-program
-  (is (= (eval-program '[3]) 3))
-  (is (= (eval-program
-          '[(def a 3)
-            a])
-         3)))
+(expect 5
+        (eval '(+ (+ 1 2) 1 1)))
 
-(deftest test-fn
-  (is (= (value-of (eval-sexp '((fn [x] x) 2)))
-         2))
-  (is (= (eval-program '[(def f (fn [y] y))
-                         (f 4)])
-         4))
-  (is (= (eval-program '[(def square (fn [x] (* x x)))
-                         (+ (square 3) (square 4))])
-         25)))
+(expect {'a 3}
+        (get-env (eval-sexp '(def a 3) {})))
+
+(expect '2
+        (eval '(if true 2 3)))
+
+(expect '3
+        (eval '(if false 2 3)))
+
+(expect '(if test
+           result)
+        (cond->if '(cond test result)))
+
+(expect '(if c1
+           r1
+           (if c2
+             r2))
+        (cond->if '(cond c1
+                        r1
+                        c2
+                        r2)))
+
+(expect 3
+        (eval '(if true 3)))
+
+(expect '(if true 3)
+        (cond->if '(cond true
+                     3
+                     )))
+
+(expect 3
+        (eval '(cond true 3)))
+
+(expect 3
+        (eval-program '[3]))
+
+(expect 3
+        (eval-program
+         '[(def a 3)
+           a]))
+
+(expect 2
+        (eval '((fn [x] x) 2)))
+
+(expect 4
+        (eval-program '[(def f (fn [y] y))
+                        (f 4)]))
+
+(expect 25
+        (eval-program '[(def square (fn [x] (* x x)))
+                        (+ (square 3) (square 4))]))
