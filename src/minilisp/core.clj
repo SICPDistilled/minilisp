@@ -1,7 +1,7 @@
 (ns minilisp.core
   (:refer-clojure :exclude [fn? eval true?]))
 
-(declare apply-proc primative-procedure eval)
+(declare apply-proc primitive-procedure eval)
 
 (defn error [& msg] (apply println msg))
 
@@ -11,7 +11,7 @@
 ;; Identifying expressions
 (defn self-evaluating? [exp]
   (or (number? exp)
-      (primative-procedure exp)
+      (primitive-procedure exp)
       (= 'true exp)
       (= 'false exp)))
 
@@ -139,17 +139,17 @@
                     [nil {}]
                     sexps)))
 
-(def primative-procedure {'+ + '- - '* * '/ /})
+(def primitive-procedure {'+ + '- - '* * '/ /})
 
 (def compound-procedure? map?)
 
-(defn apply-primative-procedure [proc args]
-  (apply (primative-procedure proc) args))
+(defn apply-primitive-procedure [proc args]
+  (apply (primitive-procedure proc) args))
 
 (defn apply-proc [proc args]
   (cond
-   (primative-procedure proc)
-   (apply-primative-procedure proc args)
+   (primitive-procedure proc)
+   (apply-primitive-procedure proc args)
 
    (compound-procedure? proc)
    (eval (:body proc)
