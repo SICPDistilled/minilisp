@@ -7,8 +7,8 @@
 (expect '3
         (eval '3))
 
-(expect 'true
-        (eval 'true))
+(expect 'TRUE
+        (eval 'TRUE))
 
 (expect 2
         (eval 'a {'a 2}))
@@ -23,10 +23,10 @@
         (get-env (eval-sexp '(def a 3) {})))
 
 (expect '2
-        (eval '(if true 2 3)))
+        (eval '(if TRUE 2 3)))
 
 (expect '3
-        (eval '(if false 2 3)))
+        (eval '(if FALSE 2 3)))
 
 (expect '(if test
            result)
@@ -42,15 +42,15 @@
                         r2)))
 
 (expect 3
-        (eval '(if true 3)))
+        (eval '(if TRUE 3)))
 
-(expect '(if true 3)
-        (cond->if '(cond true
+(expect '(if TRUE 3)
+        (cond->if '(cond TRUE
                      3
                      )))
 
 (expect 3
-        (eval '(cond true 3)))
+        (eval '(cond TRUE 3)))
 
 (expect 3
         (eval-program '[3]))

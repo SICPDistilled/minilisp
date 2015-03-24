@@ -12,8 +12,8 @@
 (defn self-evaluating? [exp]
   (or (number? exp)
       (primitive-procedure exp)
-      (= 'true exp)
-      (= 'false exp)))
+      (= 'TRUE exp)
+      (= 'FALSE exp)))
 
 (defn variable? [exp]
   (symbol? exp))
@@ -64,7 +64,7 @@
        (= 'if (first sexp))))
 
 (defn true? [sexp]
-  (if (= 'false sexp)
+  (if (= 'FALSE sexp)
     false
     true))
 
