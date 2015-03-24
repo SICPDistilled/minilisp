@@ -5,72 +5,26 @@
 
 (defn error [& msg] (apply println msg))
 
-(defn third [col]
-  (nth col 2))
-
-;; Identifying expressions
 (defn self-evaluating? [exp]
   (or (number? exp)
       (primitive-procedure exp)
       (= 'TRUE exp)
       (= 'FALSE exp)))
 
-(defn starts-with? [sexp sym]
-  (and (seq? sexp)
-       (= (first sexp) sym)))
-
 (defn variable? [exp]
   (symbol? exp))
 
-(defn def? [exp]
-  (starts-with? exp 'def))
-
 (def get-env second)
 
-(defn def-name [exp]
-  (second exp))
+(def value-of first)
 
-(defn def-value [exp]
-  (third exp))
-
-;; Dealing with applications, ie (<operator> *<operands>)
-(defn application? [sexp]
-  (seq? sexp))
-
-(defn operator [sexp]
-  (first sexp))
-
-(defn operands [sexp]
-  (rest sexp))
-
-;; Dealing with fns
-(defn fn? [exp]
-  (starts-with? exp 'fn))
-
-(defn fn-params [exp]
-  (second exp))
-
-(defn fn-body [exp]
-  (third exp))
-
-;; Turn fns to an 'applyable' object
 (defn make-procedure [params body env]
   {:params params
    :body body
    :env env})
 
-(def value-of first)
-
-(defn if? [sexp]
-  (starts-with? sexp 'if))
-
 (defn true? [sexp]
-  (if (= 'FALSE sexp)
-    false
-    true))
-
-(defn cond? [sexp]
-  (starts-with? sexp 'cond))
+  (not= 'FALSE sexp))
 
 (defn eval-if [[_ pred consequent alternative] env]
   (if (true? (eval pred env))
@@ -99,31 +53,35 @@
            (variable? sexp)
            [(env sexp) env]
 
-           (def? sexp)
-           [nil (let [name (def-name sexp)
-                       value (def-value sexp)]
-                  (assoc env name (value-of (eval-sexp value env))))]
+           (seq? sexp)
+           (let [[op & operands] sexp]
+             (cond
+              (= op 'def)
+              [nil
+               (let [[name exp] operands
+                     value (eval exp env)]
+                 (assoc env name value))]
 
-           (if? sexp)
-           [(eval-if sexp env)
-            nil]
+              (= op 'if)
+              [(eval-if sexp env)
+               nil]
 
-           (cond? sexp)
-           (eval-sexp (cond->if sexp) env)
+              (= op 'cond)
+              (eval-sexp (cond->if sexp) env)
 
-           (fn? sexp)
-           [(make-procedure (fn-params sexp)
-                            (fn-body sexp)
-                            env)
-            env]
+              (= op 'fn)
+              (let [[params body] operands]
+                [(make-procedure params
+                                 body
+                                 env)
+                 env])
 
-
-           (application? sexp)
-           [(apply-proc (value-of (eval-sexp (operator sexp) env))
-                        (map (fn [operand]
-                               (value-of (eval-sexp operand env)))
-                             (operands sexp)))
-            env]
+              :else
+              [(apply-proc (eval op env)
+                           (map (fn [operand]
+                                  (eval operand env))
+                                operands))
+               env]))
 
            :else
            (error "EVAL FAIL" sexp))))
@@ -143,13 +101,10 @@
 
 (def compound-procedure? map?)
 
-(defn apply-primitive-procedure [proc args]
-  (apply (primitive-procedure proc) args))
-
 (defn apply-proc [proc args]
   (cond
    (primitive-procedure proc)
-   (apply-primitive-procedure proc args)
+   (apply (primitive-procedure proc) args)
 
    (compound-procedure? proc)
    (eval (:body proc)
