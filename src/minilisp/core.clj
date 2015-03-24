@@ -15,12 +15,15 @@
       (= 'TRUE exp)
       (= 'FALSE exp)))
 
+(defn starts-with? [sexp sym]
+  (and (seq? sexp)
+       (= (first sexp) sym)))
+
 (defn variable? [exp]
   (symbol? exp))
 
 (defn def? [exp]
-  (and (seq? exp)
-       (= (first exp) 'def)))
+  (starts-with? exp 'def))
 
 (def get-env second)
 
@@ -42,8 +45,7 @@
 
 ;; Dealing with fns
 (defn fn? [exp]
-  (and (seq? exp)
-       (= 'fn (first exp))))
+  (starts-with? exp 'fn))
 
 (defn fn-params [exp]
   (second exp))
@@ -60,8 +62,7 @@
 (def value-of first)
 
 (defn if? [sexp]
-  (and (seq? sexp)
-       (= 'if (first sexp))))
+  (starts-with? sexp 'if))
 
 (defn true? [sexp]
   (if (= 'FALSE sexp)
@@ -69,8 +70,7 @@
     true))
 
 (defn cond? [sexp]
-  (and (seq? sexp)
-       (= 'cond (first sexp))))
+  (starts-with? sexp 'cond))
 
 (defn eval-if [[_ pred consequent alternative] env]
   (if (true? (eval pred env))
