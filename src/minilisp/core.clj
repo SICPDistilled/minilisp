@@ -11,9 +11,6 @@
       (= 'TRUE exp)
       (= 'FALSE exp)))
 
-(defn variable? [exp]
-  (symbol? exp))
-
 (def get-env second)
 
 (def value-of first)
@@ -50,7 +47,7 @@
      (cond (self-evaluating? sexp)
            [sexp env]
 
-           (variable? sexp)
+           (symbol? sexp)
            [(env sexp) env]
 
            (seq? sexp)
