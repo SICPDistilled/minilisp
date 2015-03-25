@@ -3,7 +3,7 @@
 
 (declare apply-proc primitive-procedure eval)
 
-(defn error [& msg] (apply println msg))
+(defn error [& msg] (assert false (apply str msg)))
 
 (def bools #{'TRUE 'FALSE})
 
@@ -81,7 +81,7 @@
                env]))
 
            :else
-           (error "EVAL FAIL" sexp))))
+           (error "EVAL FAIL: " sexp))))
 
 (defn eval
   ([sexp] (eval sexp {}))
