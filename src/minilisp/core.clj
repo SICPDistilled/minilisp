@@ -32,11 +32,10 @@
 (defn pairs->if [[pred consequence & pairs]]
   (if (nil? pairs)
     (list 'if pred consequence)
-    (let [tail (pairs->if pairs)]
-      (list 'if
-            pred
-            consequence
-            tail))))
+    (list 'if
+          pred
+          consequence
+          (pairs->if pairs))))
 
 (defn cond->if [sexp]
   (let [pairs (rest sexp)]
