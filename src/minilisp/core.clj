@@ -60,7 +60,7 @@
 
       (= op 'if)
       [(eval-if sexp env)
-       nil]
+       env]
 
       (= op 'cond)
       (eval-sexp (cond->if sexp) env)

@@ -70,3 +70,8 @@
 (expect 25
         (eval-program '[(def square (fn [x] (* x x)))
                         (+ (square 3) (square 4))]))
+
+(expect 3
+        (eval-program '[(def a 3)
+                        (if TRUE a)
+                        a]))
