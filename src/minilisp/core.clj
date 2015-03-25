@@ -5,11 +5,12 @@
 
 (defn error [& msg] (apply println msg))
 
+(def bools #{'TRUE 'FALSE})
+
 (defn self-evaluating? [exp]
   (or (number? exp)
       (primitive-procedure exp)
-      (= 'TRUE exp)
-      (= 'FALSE exp)))
+      (bools exp)))
 
 (def get-env second)
 
