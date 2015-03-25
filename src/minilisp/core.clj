@@ -44,44 +44,45 @@
 (defn eval-sexp
   ([sexp] (eval-sexp sexp {}))
   ([sexp env]
-     (cond (self-evaluating? sexp)
-           [sexp env]
+     (cond
+      (self-evaluating? sexp)
+      [sexp env]
 
-           (symbol? sexp)
-           [(env sexp) env]
+      (symbol? sexp)
+      [(env sexp) env]
 
-           (seq? sexp)
-           (let [[op & operands] sexp]
-             (cond
-              (= op 'def)
-              [nil
-               (let [[name exp] operands
-                     value (eval exp env)]
-                 (assoc env name value))]
+      (seq? sexp)
+      (let [[op & operands] sexp]
+        (cond
+         (= op 'def)
+         [nil
+          (let [[name exp] operands
+                value (eval exp env)]
+            (assoc env name value))]
 
-              (= op 'if)
-              [(eval-if sexp env)
-               nil]
+         (= op 'if)
+         [(eval-if sexp env)
+          nil]
 
-              (= op 'cond)
-              (eval-sexp (cond->if sexp) env)
+         (= op 'cond)
+         (eval-sexp (cond->if sexp) env)
 
-              (= op 'fn)
-              (let [[params body] operands]
-                [(make-procedure params
-                                 body
-                                 env)
-                 env])
+         (= op 'fn)
+         (let [[params body] operands]
+           [(make-procedure params
+                            body
+                            env)
+            env])
 
-              :else
-              [(apply-proc (eval op env)
-                           (map (fn [operand]
-                                  (eval operand env))
-                                operands))
-               env]))
+         :else
+         [(apply-proc (eval op env)
+                      (map (fn [operand]
+                             (eval operand env))
+                           operands))
+          env]))
 
-           :else
-           (error "EVAL FAIL: " sexp))))
+      :else
+      (error "EVAL FAIL: " sexp))))
 
 (defn eval
   ([sexp] (eval sexp {}))
