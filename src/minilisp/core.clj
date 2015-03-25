@@ -41,48 +41,46 @@
   (let [pairs (rest sexp)]
     (pairs->if pairs)))
 
-(defn eval-sexp
-  ([sexp] (eval-sexp sexp {}))
-  ([sexp env]
+(defn eval-sexp [sexp env]
+  (cond
+   (self-evaluating? sexp)
+   [sexp env]
+
+   (symbol? sexp)
+   [(env sexp) env]
+
+   (seq? sexp)
+   (let [[op & operands] sexp]
      (cond
-      (self-evaluating? sexp)
-      [sexp env]
+      (= op 'def)
+      [nil
+       (let [[name exp] operands
+             value (eval exp env)]
+         (assoc env name value))]
 
-      (symbol? sexp)
-      [(env sexp) env]
+      (= op 'if)
+      [(eval-if sexp env)
+       nil]
 
-      (seq? sexp)
-      (let [[op & operands] sexp]
-        (cond
-         (= op 'def)
-         [nil
-          (let [[name exp] operands
-                value (eval exp env)]
-            (assoc env name value))]
+      (= op 'cond)
+      (eval-sexp (cond->if sexp) env)
 
-         (= op 'if)
-         [(eval-if sexp env)
-          nil]
-
-         (= op 'cond)
-         (eval-sexp (cond->if sexp) env)
-
-         (= op 'fn)
-         (let [[params body] operands]
-           [(make-procedure params
-                            body
-                            env)
-            env])
-
-         :else
-         [(apply-proc (eval op env)
-                      (map (fn [operand]
-                             (eval operand env))
-                           operands))
-          env]))
+      (= op 'fn)
+      (let [[params body] operands]
+        [(make-procedure params
+                         body
+                         env)
+         env])
 
       :else
-      (error "EVAL FAIL: " sexp))))
+      [(apply-proc (eval op env)
+                   (map (fn [operand]
+                          (eval operand env))
+                        operands))
+       env]))
+
+   :else
+   (error "EVAL FAIL: " sexp)))
 
 (defn eval
   ([sexp] (eval sexp {}))
