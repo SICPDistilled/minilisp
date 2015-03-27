@@ -27,7 +27,9 @@
 (defn eval-if [[_ pred consequent alternative] env]
   (if (true? (eval pred env))
     (eval consequent env)
-    (eval alternative env)))
+    (if (nil? alternative)
+        'NIL
+        (eval alternative env))))
 
 (defn pairs->if [[pred consequence & pairs]]
   (if (nil? pairs)

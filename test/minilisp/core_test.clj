@@ -71,7 +71,16 @@
         (eval-program '[(def square (fn [x] (* x x)))
                         (+ (square 3) (square 4))]))
 
-(expect 3
-        (eval-program '[(def a 3)
-                        (if TRUE a)
+(expect 1
+        (eval-program '[(if TRUE 1 2)]))
+
+(expect 2
+        (eval-program '[(if FALSE 1 2)]))
+
+(expect 'NIL
+        (eval '(if FALSE 1)))
+
+(expect 1
+        (eval-program '[(def a 1)
+                        (if TRUE 1)
                         a]))
