@@ -1,9 +1,10 @@
 (ns minilisp.core
-  (:refer-clojure :exclude [fn? eval true?]))
+  (:refer-clojure :exclude [fn? eval true?]
+                  :rename {apply clj-apply}))
 
-(declare apply-proc primitive-procedure eval)
+(declare apply primitive-procedure eval)
 
-(defn error [& msg] (assert false (apply str msg)))
+(defn error [& msg] (assert false (clj-apply str msg)))
 
 (def bools #{'TRUE 'FALSE})
 
@@ -75,7 +76,7 @@
          env])
 
       :else
-      [(apply-proc (eval op env)
+      [(apply (eval op env)
                    (map (fn [operand]
                           (eval operand env))
                         operands))
@@ -99,10 +100,10 @@
 
 (def compound-procedure? map?)
 
-(defn apply-proc [proc args]
+(defn apply [proc args]
   (cond
    (primitive-procedure proc)
-   (apply (primitive-procedure proc) args)
+   (clj-apply (primitive-procedure proc) args)
 
    (compound-procedure? proc)
    (eval (:body proc)
