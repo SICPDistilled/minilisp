@@ -58,6 +58,13 @@
            body)
      values)))
 
+(defn and->if [[pred & rest]]
+  (if (nil? rest)
+    (list 'if pred 'TRUE)
+    (list 'if
+            pred
+            (and->if rest))))
+
 (defn eval-sexp [sexp env]
   (cond
    (self-evaluating? sexp)
@@ -87,6 +94,9 @@
       ;;   (eval-sexp body (merge env
       ;;                          (map-vals #(eval % env) (clj-apply hash-map bindings)))))
       (eval-sexp (let->fn sexp) env)
+
+      (= op 'and)
+      (eval-sexp (and->if operands) env)
 
       (= op 'fn)
       (let [[params body] operands]
