@@ -48,6 +48,16 @@
   (let [pairs (rest sexp)]
     (pairs->if pairs)))
 
+(defn let->fn [[_ bindings body]]
+  (let [bindings-map (clj-apply hash-map bindings)
+        names (keys bindings-map)
+        values (vals bindings-map)]
+    (cons
+     (list 'fn
+           names
+           body)
+     values)))
+
 (defn eval-sexp [sexp env]
   (cond
    (self-evaluating? sexp)
@@ -71,6 +81,12 @@
 
       (= op 'cond)
       (eval-sexp (cond->if sexp) env)
+
+      (= op 'let)
+      ;; (let [[bindings body] operands]
+      ;;   (eval-sexp body (merge env
+      ;;                          (map-vals #(eval % env) (clj-apply hash-map bindings)))))
+      (eval-sexp (let->fn sexp) env)
 
       (= op 'fn)
       (let [[params body] operands]

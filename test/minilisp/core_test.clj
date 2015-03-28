@@ -84,3 +84,24 @@
         (eval-program '[(def a 1)
                         (if TRUE 1)
                         a]))
+
+(expect 8
+        (eval-program '[(def add-n (fn [n]
+                                     (fn [r]
+                                       (+ n r))))
+                        ((add-n 3) 5)]))
+
+(expect '((fn [a c]
+             (+ a c))
+          b d)
+        (let->fn '(let [a b
+                        c d]
+                    (+ a c))))
+
+(expect 3
+        (eval '(let [a 3]
+                a)))
+
+(expect 5
+        (eval '(let [f (fn [x] (+ x 2))]
+                 (f 3))))
