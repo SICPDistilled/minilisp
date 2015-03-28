@@ -133,4 +133,4 @@
                   args)))
 
    :else
-   (error "apply-proc error")))
+   (error "APPLY FAIL: " proc args)))
