@@ -33,8 +33,8 @@
   (if (true? (eval pred env))
     (eval consequent env)
     (if (nil? alternative)
-        'NIL
-        (eval alternative env))))
+      'NIL
+      (eval alternative env))))
 
 (defn pairs->if [[pred consequence & pairs]]
   (if (nil? pairs)
@@ -62,8 +62,8 @@
   (if (nil? rest)
     (list 'if pred 'TRUE)
     (list 'if
-            pred
-            (and->if rest))))
+          pred
+          (and->if rest))))
 
 (defn eval-sexp [sexp env]
   (cond
@@ -107,9 +107,9 @@
 
       :else
       [(apply (eval op env)
-                   (map (fn [operand]
-                          (eval operand env))
-                        operands))
+              (map (fn [operand]
+                     (eval operand env))
+                   operands))
        env]))
 
    :else
