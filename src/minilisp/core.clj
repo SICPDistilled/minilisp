@@ -4,6 +4,10 @@
 
 (declare apply primitive-procedure eval)
 
+(defn map-vals [f m]
+  (into (empty m) (for [[k v] m]
+                    [k (f v)])))
+
 (defn error [& msg] (assert false (clj-apply str msg)))
 
 (def bools #{'TRUE 'FALSE})
