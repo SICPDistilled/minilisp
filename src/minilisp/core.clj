@@ -126,7 +126,7 @@
                     [nil {}]
                     sexps)))
 
-(def primitive-procedure {'+ + '- - '* * '/ /})
+(def primitive-procedure {'+ + '- - '* * '/ / '= =})
 
 (def compound-procedure? map?)
 
