@@ -21,10 +21,10 @@
 
 (def value-of first)
 
-(defrecord Proc [params body env])
-
 (defn make-procedure [params body env]
-  (Proc. params body env))
+  {:params params
+   :body body
+   :env env})
 
 (defn true? [sexp]
   (not= 'FALSE sexp))
