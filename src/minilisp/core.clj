@@ -14,7 +14,6 @@
 
 (defn self-evaluating? [exp]
   (or (number? exp)
-      (primitive-procedure exp)
       (bools exp)))
 
 (def get-env second)
@@ -69,6 +68,9 @@
   (cond
    (self-evaluating? sexp)
    [sexp env]
+
+   (primitive-procedure sexp)
+   [(primitive-procedure sexp) env]
 
    (symbol? sexp)
    [(env sexp) env]
@@ -128,12 +130,14 @@
 
 (def primitive-procedure {'+ + '- - '* * '/ / '= =})
 
+(def primitive-procedure? (set (vals primitive-procedure)))
+
 (def compound-procedure? map?)
 
 (defn apply [proc args]
   (cond
-   (primitive-procedure proc)
-   (clj-apply (primitive-procedure proc) args)
+   (primitive-procedure? proc)
+   (clj-apply proc args)
 
    (compound-procedure? proc)
    (eval (:body proc)
