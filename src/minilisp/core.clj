@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [fn? eval true?]
                   :rename {apply clj-apply}))
 
-(declare apply primitive-procedure eval)
+(declare apply primitive-procedure eval primitive-procedure-name? primitive-procedure-map)
 
 (defn map-vals [f m]
   (into (empty m) (for [[k v] m]
@@ -69,8 +69,8 @@
    (self-evaluating? sexp)
    [sexp env]
 
-   (primitive-procedure sexp)
-   [(primitive-procedure sexp) env]
+   (primitive-procedure-name? sexp)
+   [(primitive-procedure-map sexp) env]
 
    (symbol? sexp)
    [(env sexp) env]
@@ -128,9 +128,17 @@
                     [nil {}]
                     sexps)))
 
-(def primitive-procedure {'+ + '- - '* * '/ / '= =})
+(def primitive-procedure-map {
+                              '+ +
+                              '- -
+                              '* *
+                              '/ /
+                              '= =
+                              'square (fn [x] (* x x))
+                              })
 
-(def primitive-procedure? (set (vals primitive-procedure)))
+(def primitive-procedure-name? (set (keys primitive-procedure-map)))
+(def primitive-procedure? (set (vals primitive-procedure-map)))
 
 (def compound-procedure? map?)
 
