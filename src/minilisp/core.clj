@@ -35,13 +35,18 @@
       'NIL
       (eval alternative env))))
 
+(defn make-if
+  ([pred consequence]
+     (list 'if pred consequence))
+  ([pred consequence alternative]
+     (list 'if pred consequence alternative)))
+
 (defn pairs->if [[pred consequence & pairs]]
   (if (nil? pairs)
-    (list 'if pred consequence)
-    (list 'if
-          pred
-          consequence
-          (pairs->if pairs))))
+    (make-if pred consequence)
+    (make-if pred
+             consequence
+             (pairs->if pairs))))
 
 (defn cond->if [sexp]
   (let [pairs (rest sexp)]
@@ -59,10 +64,9 @@
 
 (defn and->if [[pred & rest]]
   (if (nil? rest)
-    (list 'if pred 'TRUE)
-    (list 'if
-          pred
-          (and->if rest))))
+    (make-if pred 'TRUE)
+    (make-if pred
+             (and->if rest))))
 
 (defn eval-sexp [sexp env]
   (cond
