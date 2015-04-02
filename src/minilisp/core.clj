@@ -16,10 +16,6 @@
   (or (number? exp)
       (bools exp)))
 
-(def get-env second)
-
-(def value-of first)
-
 (defn make-procedure [params body env]
   {:params params
    :body body
@@ -72,26 +68,29 @@
 (defn eval-sexp [sexp env]
   (cond
    (self-evaluating? sexp)
-   [sexp env]
+   {:result sexp
+    :env env}
 
    (primitive-procedure-name? sexp)
-   [(primitive-procedure-map sexp) env]
+   {:result (primitive-procedure-map sexp)
+    :env env}
 
    (symbol? sexp)
-   [(env sexp) env]
+   {:result (env sexp)
+    :env env}
 
    (seq? sexp)
    (let [[op & operands] sexp]
      (cond
       (= op 'def)
-      [nil
-       (let [[name exp] operands
-             value (eval exp env)]
-         (assoc env name value))]
+      {:result 'NULL
+       :env (let [[name exp] operands
+                  value (eval exp env)]
+              (assoc env name value))}
 
       (= op 'if)
-      [(eval-if sexp env)
-       env]
+      {:result (eval-if sexp env)
+       :env env}
 
       (= op 'cond)
       (eval-sexp (cond->if sexp) env)
@@ -107,17 +106,17 @@
 
       (= op 'fn)
       (let [[params body] operands]
-        [(make-procedure params
-                         body
-                         env)
-         env])
+        {:result (make-procedure params
+                                 body
+                                 env)
+         :env env})
 
       :else
-      [(apply (eval op env)
-              (map (fn [operand]
-                     (eval operand env))
-                   operands))
-       env]))
+      {:result  (apply (eval op env)
+                       (map (fn [operand]
+                              (eval operand env))
+                            operands))
+       :env env}))
 
    :else
    (error "EVAL FAIL: " sexp)))
@@ -125,12 +124,12 @@
 (defn eval
   ([sexp] (eval sexp {}))
   ([sexp env]
-     (value-of (eval-sexp sexp env))))
+     (:result (eval-sexp sexp env))))
 
 (defn eval-program [sexps]
-  (value-of (reduce (fn [[return-value env] sexp]
+  (:result (reduce (fn [{:keys [env]} sexp]
                       (eval-sexp sexp env))
-                    [nil {}]
+                    {:env {}}
                     sexps)))
 
 (def primitive-procedure-map {

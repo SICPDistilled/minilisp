@@ -20,7 +20,7 @@
         (eval '(+ (+ 1 2) 1 1)))
 
 (expect {'a 3}
-        (get-env (eval-sexp '(def a 3) {})))
+        (:env (eval-sexp '(def a 3) {})))
 
 (expect '2
         (eval '(if TRUE 2 3)))
