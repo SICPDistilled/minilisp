@@ -69,32 +69,29 @@
     (make-if pred
              (and->if rest))))
 
+(defrecord State [result env])
 (defn eval-sexp [sexp env]
   (cond
    (self-evaluating? sexp)
-   {:result sexp
-    :env env}
+   (State. sexp env)
 
    (primitive-procedure-name? sexp)
-   {:result (primitive-procedure-map sexp)
-    :env env}
+   (State. (primitive-procedure-map sexp) env)
 
    (symbol? sexp)
-   {:result (env sexp)
-    :env env}
+   (State. (env sexp) env)
 
    (seq? sexp)
    (let [[op & operands] sexp]
      (cond
       (= op 'def)
-      {:result 'NULL
-       :env (let [[name exp] operands
-                  value (eval exp env)]
-              (assoc env name value))}
+      (State. 'NIL
+              (let [[name exp] operands
+                    value (eval exp env)]
+                (assoc env name value)))
 
       (= op 'if)
-      {:result (eval-if sexp env)
-       :env env}
+      (State. (eval-if sexp env) env)
 
       (= op 'cond)
       (eval-sexp (cond->if sexp) env)
@@ -108,17 +105,17 @@
 
       (= op 'fn)
       (let [[params body] operands]
-        {:result (make-procedure params
-                                 body
-                                 env)
-         :env env})
+        (State. (make-procedure params
+                                body
+                                env)
+                env))
 
       :else
-      {:result  (apply (eval op env)
-                       (map (fn [operand]
-                              (eval operand env))
-                            operands))
-       :env env}))
+      (State. (apply (eval op env)
+                     (map (fn [operand]
+                            (eval operand env))
+                          operands))
+              env)))
 
    :else
    (error "EVAL FAIL: " sexp)))
