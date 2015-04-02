@@ -41,6 +41,9 @@
   ([pred consequence alternative]
      (list 'if pred consequence alternative)))
 
+(defn make-fn [params body]
+  (list 'fn params body))
+
 (defn pairs->if [[pred consequence & pairs]]
   (if (nil? pairs)
     (make-if pred consequence)
@@ -57,9 +60,7 @@
         names (keys bindings-map)
         values (vals bindings-map)]
     (cons
-     (list 'fn
-           names
-           body)
+     (make-fn names body)
      values)))
 
 (defn and->if [[pred & rest]]
