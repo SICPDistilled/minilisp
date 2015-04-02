@@ -31,6 +31,10 @@
       'NIL
       (eval alternative env))))
 
+(defn eval-let [[bindings body] env]
+  (eval body (merge env
+                    (map-vals #(eval % env) (clj-apply hash-map bindings)))))
+
 (defn make-if
   ([pred consequence]
      (list 'if pred consequence))
@@ -96,10 +100,8 @@
       (eval-sexp (cond->if sexp) env)
 
       (= op 'let)
-      ;; (let [[bindings body] operands]
-      ;;   (eval-sexp body (merge env
-      ;;                          (map-vals #(eval % env) (clj-apply hash-map bindings)))))
       (eval-sexp (let->fn sexp) env)
+      ;; (eval-let operands env)
 
       (= op 'and)
       (eval-sexp (and->if operands) env)
