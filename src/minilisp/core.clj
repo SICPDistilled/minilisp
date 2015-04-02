@@ -70,6 +70,7 @@
              (and->if rest))))
 
 (defrecord State [result env])
+
 (defn eval-sexp [sexp env]
   (cond
    (self-evaluating? sexp)
@@ -131,14 +132,8 @@
                     {:env {}}
                     sexps)))
 
-(def primitive-procedure-map {
-                              '+ +
-                              '- -
-                              '* *
-                              '/ /
-                              '= =
-                              'square (fn [x] (* x x))
-                              })
+(def primitive-procedure-map { '+ + '- - '* * '/ / '= =
+                               'square (fn [x] (* x x))})
 
 (def primitive-procedure-name? (set (keys primitive-procedure-map)))
 (def primitive-procedure? (set (vals primitive-procedure-map)))
