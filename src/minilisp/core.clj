@@ -46,9 +46,8 @@
              consequence
              (pairs->if pairs))))
 
-(defn cond->if [sexp]
-  (let [pairs (rest sexp)]
-    (pairs->if pairs)))
+(defn cond->if [[_ & pairs]]
+  (pairs->if pairs))
 
 (defn let->fn [[_ bindings body]]
   (let [bindings-map (clj-apply hash-map bindings)
