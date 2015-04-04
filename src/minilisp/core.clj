@@ -12,9 +12,9 @@
 
 (def bools #{'TRUE 'FALSE})
 
-(defn self-evaluating? [exp]
-  (or (number? exp)
-      (bools exp)))
+(defn self-evaluating? [sexp]
+  (or (number? sexp)
+      (bools sexp)))
 
 (defn true? [sexp]
   (not= 'FALSE sexp))
