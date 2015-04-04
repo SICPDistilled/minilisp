@@ -69,26 +69,26 @@
 
 (defn eval-sexp [sexp env]
   (cond
-   (self-evaluating? sexp)
-   (State. sexp env)
+   (self-evaluating? sexp)  ; If it is self evaluating
+   (State. sexp env)        ; return it and dont change env
 
-   (primitive-procedure-name? sexp)
-   (State. (primitive-procedure-map sexp) env)
+   (primitive-procedure-name? sexp)              ; if it's a primative procedure
+   (State. (primitive-procedure-map sexp) env)   ; look it up in primitive-procedure-map
 
-   (symbol? sexp)
-   (State. (env sexp) env)
+   (symbol? sexp)           ; If it is a symbol
+   (State. (env sexp) env)  ; Look it up in env, env unchanged
 
-   (seq? sexp)
-   (let [[op & operands] sexp]
+   (seq? sexp)                 ; Otherwise, it's a sequence
+   (let [[op & operands] sexp] ; We destructure the operator and operands
      (cond
-      (= op 'def)
-      (State. 'NIL
-              (let [[name exp] operands
-                    value (eval exp env)]
-                (assoc env name value)))
+      (= op 'def)                           ; If it's a def
+      (State. 'NIL                          ; Return nil and
+              (let [[name exp] operands     ; Fetch out the name and expression
+                    value (eval exp env)]   ; evaluate the expression
+                (assoc env name value)))    ; and assoc the name in the env to the value
 
-      (= op 'if)
-      (State. (eval-if sexp env) env)
+      (= op 'if)                            ; If it's an if
+      (State. (eval-if sexp env) env)       ; evaluate it using a special rule and don't change the env
 
       (= op 'cond)
       (eval-sexp (cond->if sexp) env)
@@ -99,17 +99,17 @@
       (= op 'and)
       (eval-sexp (and->if operands) env)
 
-      (= op 'fn)
-      (let [[params body] operands]
-        (State. (Proc. params body env)
-                env))
+      (= op 'fn)                          ; If it's a fn
+      (let [[params body] operands]       ; destructure the params and body from operands
+        (State. (Proc. params body env)   ; Return a Proc of the parameters and body that closes over the current env
+                env))                     ; Without changing it
 
-      :else
-      (State. (apply (eval op env)
-                     (map (fn [operand]
-                            (eval operand env))
+      :else                                     ; Otherwise
+      (State. (apply (eval op env)              ; We assume it's a function call and apply the evaluated operator
+                     (map (fn [operand]         ;   (which may be a primitive a Proc)
+                            (eval operand env)) ; to the evaluated operands
                           operands))
-              env)))
+              env)))                            ; again, without changing the environment
 
    :else
    (error "EVAL FAIL: " sexp)))
@@ -135,14 +135,14 @@
 
 (defn apply [proc args]
   (cond
-   (primitive-procedure? proc)
-   (clj-apply proc args)
+   (primitive-procedure? proc)   ; if it's a primitive procedure
+   (clj-apply proc args)         ; apply it (in Clojure) to the args
 
-   (compound-procedure? proc)
-   (eval (:body proc)
-         (merge
-          (:env proc)
-          (zipmap (:params proc)
+   (compound-procedure? proc)    ; if it's a compound procedure
+   (eval (:body proc)            ; evaluate the body
+         (merge                  ; in a new environment made
+          (:env proc)            ; by taking the environment closed over on creation
+          (zipmap (:params proc) ; and assigning the formal parameters to arguments
                   args)))
 
    :else
