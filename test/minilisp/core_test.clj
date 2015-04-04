@@ -2,7 +2,7 @@
   (:require
             [minilisp.core :refer :all]
             [expectations :refer :all])
-  (:refer-clojure :exclude [eval fn? true? apply]))
+  (:refer-clojure :exclude [eval true? apply]))
 
 (expect '3
         (eval '3))

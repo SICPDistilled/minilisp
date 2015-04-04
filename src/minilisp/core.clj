@@ -1,5 +1,5 @@
 (ns minilisp.core
-  (:refer-clojure :exclude [fn? eval true?]
+  (:refer-clojure :exclude [eval true?]
                   :rename {apply clj-apply}))
 
 (declare apply primitive-procedure eval primitive-procedure-name? primitive-procedure-map)
