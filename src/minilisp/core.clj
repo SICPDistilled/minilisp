@@ -16,11 +16,6 @@
   (or (number? exp)
       (bools exp)))
 
-(defn make-procedure [params body env]
-  {:params params
-   :body body
-   :env env})
-
 (defn true? [sexp]
   (not= 'FALSE sexp))
 
@@ -71,6 +66,8 @@
 
 (defrecord State [result env])
 
+(defrecord Proc [params body env])
+
 (defn eval-sexp [sexp env]
   (cond
    (self-evaluating? sexp)
@@ -106,9 +103,7 @@
 
       (= op 'fn)
       (let [[params body] operands]
-        (State. (make-procedure params
-                                body
-                                env)
+        (State. (Proc. params body env)
                 env))
 
       :else
