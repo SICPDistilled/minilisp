@@ -122,7 +122,7 @@
 (defn eval-program [sexps]
   (:result (reduce (fn [{:keys [env]} sexp]
                       (eval-sexp sexp env))
-                    {:env {}}
+                    (State. 'NIL {})
                     sexps)))
 
 (def primitive-procedure-map { '+ + '- - '* * '/ / '= =
