@@ -96,7 +96,6 @@
 
       (= op 'let)
       (eval-sexp (let->fn sexp) env)
-      ;; (eval-let operands env)
 
       (= op 'and)
       (eval-sexp (and->if operands) env)
