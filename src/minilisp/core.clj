@@ -119,11 +119,14 @@
   ([sexp env]
      (:result (eval-sexp sexp env))))
 
+(defn next-state [last-state sexp]
+  (let [env (:env last-state)]
+    (eval-sexp sexp env)))
+
+(def initial-state (State. 'NIL {}))
+
 (defn eval-program [sexps]
-  (:result (reduce (fn [{:keys [env]} sexp]
-                      (eval-sexp sexp env))
-                    (State. 'NIL {})
-                    sexps)))
+  (:result (reduce next-state initial-state sexps)))
 
 (def primitive-procedure-map { '+ + '- - '* * '/ / '= =
                                'square (fn [x] (* x x))})
