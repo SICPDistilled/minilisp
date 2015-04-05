@@ -50,12 +50,11 @@
   (pairs->if pairs))
 
 (defn let->fn [[_ bindings body]]
-  (let [bindings-map (clj-apply hash-map bindings)
-        names (keys bindings-map)
-        values (vals bindings-map)]
+  (let [params (take-nth 2 bindings)
+        args (take-nth 2 (rest bindings))]
     (cons
-     (make-fn names body)
-     values)))
+     (make-fn params body)
+     args)))
 
 (defn and->if [[pred & rest]]
   (if (nil? rest)
