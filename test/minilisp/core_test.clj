@@ -106,20 +106,23 @@
         (eval '(let [f (fn [x] (+ x 2))]
                  (f 3))))
 
+(def preamble '[(def cons (fn [x y]
+                            (fn [m]
+                              (cond (= m 0) x
+                                    (= m 1) y))))
+
+                (def car (fn [z]
+                           (z 0)))
+
+                (def cdr (fn  [z]
+                           (z 1)))
+
+                (def t (cons 3 4))])
+
 (expect 'TRUE
-        (eval-program '[(def cons (fn [x y]
-                                    (fn [m]
-                                      (cond (= m 0) x
-                                            (= m 1) y))))
+        (eval-program (concat preamble
+                              '[(= (car t) 3)])))
 
-                        (def car (fn [z]
-                                   (z 0)))
-
-                        (def cdr (fn  [z]
-                                   (z 1)))
-
-                        (def t (cons 3 4))
-                        (and (= (car t) 3)
-                             (= (cdr t) 4))
-
-                        ]))
+(expect 'TRUE
+        (eval-program (concat preamble
+                              '[(= (cdr t) 4)])) )
