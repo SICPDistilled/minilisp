@@ -127,8 +127,10 @@
 (defn eval-program [sexps]
   (:result (reduce next-state initial-state sexps)))
 
-(def primitive-procedure-map { '+ + '- - '* * '/ / '= =
-                               'square (fn [x] (* x x))})
+(def primitive-procedure-map {'+ + '- - '* * '/ /
+                              '= (fn [& args]
+                                   (if (clj-apply = args) 'TRUE 'FALSE))
+                              'square (fn [x] (* x x))})
 
 (def primitive-procedure-name? (set (keys primitive-procedure-map)))
 (def primitive-procedure? (set (vals primitive-procedure-map)))
