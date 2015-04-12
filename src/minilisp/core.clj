@@ -56,12 +56,6 @@
      (make-fn params body)
      args)))
 
-(defn and->if [[pred & rest]]
-  (if (nil? rest)
-    (make-if pred 'TRUE)
-    (make-if pred
-             (and->if rest))))
-
 (defrecord State [result env])
 
 (defrecord Proc [params body env])
@@ -94,9 +88,6 @@
 
       (= op 'let)
       (eval-sexp (let->fn sexp) env)
-
-      (= op 'and)
-      (eval-sexp (and->if operands) env)
 
       (= op 'fn)                          ; If it's a fn
       (let [[params body] operands]       ; destructure the params and body from operands
