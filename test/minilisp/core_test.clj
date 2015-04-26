@@ -126,3 +126,9 @@
 (expect 'TRUE
         (eval-program (concat preamble
                               '[(= (cdr t) 4)])) )
+
+(expect 7
+        (eval '(((fn [x]
+                   (fn [y] (+ x y)))
+                 3)
+                4)))
