@@ -58,7 +58,7 @@
 
 (defrecord State [result env])
 
-(defrecord Proc [params body env])
+(defrecord Proc [params body env name])
 
 (defn eval-sexp [sexp env]
   (cond
@@ -74,32 +74,42 @@
    (seq? sexp)                 ; Otherwise, it's a sequence
    (let [[op & operands] sexp] ; We destructure the operator and operands
      (cond
-      (= op 'def)                           ; If it's a def
-      (State. 'NIL                          ; Return nil and
-              (let [[name exp] operands     ; Fetch out the name and expression
-                    value (eval exp env)]   ; evaluate the expression
-                (assoc env name value)))    ; and assoc the name in the env to the value
+       (= op 'def)                           ; If it's a def
+       (State. 'NIL                          ; Return nil and
+               (let [[name exp] operands     ; Fetch out the name and expression
+                     value (eval exp env)]   ; evaluate the expression
+                 (assoc env name value)))    ; and assoc the name in the env to the value
 
-      (= op 'if)                            ; If it's an if
-      (State. (eval-if sexp env) env)       ; evaluate it using a special rule and don't change the env
+       (= op 'defn)
+       (State. 'NIL                                          ; If it's a defn
+               (let [[name params body] operands             ; Destructure the name, body and params
+                     new-fn (Proc. params body env name)]    ; Make a new procedure (with a name)
+                 (assoc env name new-fn)))                   ; Add it to the environment
 
-      (= op 'cond)
-      (eval-sexp (cond->if sexp) env)
 
-      (= op 'let)
-      (eval-sexp (let->fn sexp) env)
+       (= op 'if)                            ; If it's an if
+       (State. (eval-if sexp env) env)       ; evaluate it using a special rule and don't change the env
 
-      (= op 'fn)                          ; If it's a fn
-      (let [[params body] operands]       ; destructure the params and body from operands
-        (State. (Proc. params body env)   ; Return a Proc of the parameters and body that closes over the current env
-                env))                     ; Without changing it
+       (= op 'cond)
+       (eval-sexp (cond->if sexp) env)
 
-      :else                                     ; Otherwise
-      (State. (apply (eval op env)              ; We assume it's a function call and apply the evaluated operator
-                     (map (fn [operand]         ;   (which may be a primitive a Proc)
-                            (eval operand env)) ; to the evaluated operands
-                          operands))
-              env)))                            ; again, without changing the environment
+       (= op 'let)
+       (eval-sexp (let->fn sexp) env)
+
+       (= op 'fn)                          ; If it's a fn
+       (let [[params body] operands]       ; destructure the params and body from operands
+         (State. (Proc. params             ; Return a Proc of the parameters
+                        body               ; and body
+                        env                ; that closes over the current env
+                        nil)               ; and does not have a name
+                 env))                     ; without changing the environment
+
+       :else                                     ; Otherwise
+       (State. (apply (eval op env)              ; We assume it's a function call and apply the evaluated operator
+                      (map (fn [operand]         ;   (which may be a primitive a Proc)
+                             (eval operand env)) ; to the evaluated operands
+                           operands))
+               env)))                            ; again, without changing the environment
 
    :else
    (error "EVAL FAIL: " sexp)))
@@ -137,6 +147,7 @@
    (eval (:body proc)            ; evaluate the body
          (merge                  ; in a new environment made
           (:env proc)            ; by taking the environment closed over on creation
+          {(:name proc) proc}    ; adding a reference to the proc (if it has one)
           (zipmap (:params proc) ; and assigning the formal parameters to arguments
                   args)))
 

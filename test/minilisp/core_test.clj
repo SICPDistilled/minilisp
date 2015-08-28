@@ -132,3 +132,17 @@
                    (fn [y] (+ x y)))
                  3)
                 4)))
+
+(expect 1
+        (eval-program '[(defn factorial [n]
+                          (if (= n 1)
+                            1
+                            (* n (factorial (- n 1)))))
+                        (factorial 1)]))
+
+(expect 6
+        (eval-program '[(defn factorial [n]
+                          (if (= n 1)
+                            1
+                            (* n (factorial (- n 1)))))
+                        (factorial 3)]))
